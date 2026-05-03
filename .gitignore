@@ -1,0 +1,23 @@
+# Build directory (CMake cache - platform specific)
+build/
+
+# Compiled Windows binaries in root
+*.exe
+
+# Common CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# VS / VS Code
+.vs/
+.vscode/
+*.user
+out/
+
+# MinGW / compiler artifacts
+*.o
+*.obj
+*.a
+*.lib
