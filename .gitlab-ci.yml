@@ -11,20 +11,17 @@ build:
   stage: build
   script:
     - apt-get update -qq && apt-get install -y cmake
-    - mkdir -p build && cd build
-    - cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE
-    - make -j2
+    - mkdir -p build
+    - cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE
+    - cmake --build build --parallel 2
   artifacts:
     paths:
-      - build/App.exe
-      - build/HashTest.exe
+      - build/
     expire_in: 1 week
 
 test:
   stage: test
   script:
-    - apt-get update -qq && apt-get install -y cmake
-    - cd build
-    - ./HashTest.exe
+    - ./build/HashTest.exe
   dependencies:
     - build
