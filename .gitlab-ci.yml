@@ -22,7 +22,17 @@ build:
 test:
   stage: test
   script:
-    - echo "<html><body><h1>Test Results</h1><pre>" > report.html
+    - |
+      echo "<html><body>
+      <h1>Pipeline Results</h1>
+
+      <h2>Algorithm Output</h2>
+      <pre>" > report.html
+    - ./build/App >> report.html 2>&1
+    - |
+      echo "</pre>
+      <h2>Test Results</h2>
+      <pre>" >> report.html
     - ./build/HashTest >> report.html 2>&1
     - echo "</pre></body></html>" >> report.html
   dependencies:
@@ -30,5 +40,5 @@ test:
   artifacts:
     paths:
       - report.html
-    expose_as: "Test Report"
+    expose_as: "Full Report"
     expire_in: 1 week
