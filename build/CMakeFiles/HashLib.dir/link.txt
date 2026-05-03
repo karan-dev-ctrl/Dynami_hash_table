@@ -1,0 +1,2 @@
+C:\MinGW\bin\ar.exe qc libHashLib.a CMakeFiles/HashLib.dir/src/LinearHashTable.cpp.obj CMakeFiles/HashLib.dir/src/ExtendibleHashTable.cpp.obj CMakeFiles/HashLib.dir/src/LarsonDynamicHashTable.cpp.obj
+C:\MinGW\bin\ranlib.exe libHashLib.a
