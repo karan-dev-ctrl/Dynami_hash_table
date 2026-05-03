@@ -22,6 +22,13 @@ build:
 test:
   stage: test
   script:
-    - ./build/HashTest
+    - echo "<html><body><h1>Test Results</h1><pre>" > report.html
+    - ./build/HashTest >> report.html 2>&1
+    - echo "</pre></body></html>" >> report.html
   dependencies:
     - build
+  artifacts:
+    paths:
+      - report.html
+    expose_as: "Test Report"
+    expire_in: 1 week
