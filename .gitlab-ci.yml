@@ -3,16 +3,19 @@ image: gcc:latest
 stages:
   - build
   - test
+  - coverage
 
 variables:
-  CMAKE_BUILD_TYPE: "Release"
+  CMAKE_BUILD_TYPE: "Debug"
 
 build:
   stage: build
   script:
     - apt-get update -qq && apt-get install -y cmake
     - mkdir -p build
-    - cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE
+    - cmake -S . -B build -G "Unix Makefiles"
+      -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE
+      -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage"
     - cmake --build build --parallel 2
   artifacts:
     paths:
@@ -25,7 +28,6 @@ test:
     - |
       echo "<html><body>
       <h1>Pipeline Results</h1>
-
       <h2>Algorithm Output</h2>
       <pre>" > report.html
     - ./build/App >> report.html 2>&1
@@ -40,5 +42,29 @@ test:
   artifacts:
     paths:
       - report.html
+      - build/
     expose_as: "Full Report"
+    expire_in: 1 week
+
+coverage:
+  stage: coverage
+  script:
+    - apt-get update -qq && apt-get install -y gcovr
+    - mkdir -p coverage-report
+    # Print summary to pipeline log
+    - gcovr -r . --exclude build/CMakeFiles/
+    # Generate HTML report
+    - gcovr -r . 
+      --exclude build/CMakeFiles/
+      --html --html-details
+      -o coverage-report/index.html
+    # Fail if coverage drops below 70%
+    - gcovr -r . --exclude build/CMakeFiles/ --fail-under-line 70
+  dependencies:
+    - test
+  coverage: '/TOTAL.*\s+(\d+%)/'
+  artifacts:
+    paths:
+      - coverage-report/
+    expose_as: "Coverage Report"
     expire_in: 1 week
