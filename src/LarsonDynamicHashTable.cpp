@@ -1,9 +1,7 @@
 #include "LarsonDynamicHashTable.h"
 
-LarsonDynamicHashTable::LarsonDynamicHashTable(int initBuckets,
-                                               int capacity,
-                                               double maxLoad,
-                                               double minLoad)
+LarsonDynamicHashTable::LarsonDynamicHashTable(int initBuckets, int capacity,
+                                               double maxLoad, double minLoad)
     : initialBuckets(initBuckets),
       bucketCapacity(capacity),
       level(0),
@@ -15,45 +13,40 @@ LarsonDynamicHashTable::LarsonDynamicHashTable(int initBuckets,
     buckets.resize(initialBuckets);
 }
 
-int LarsonDynamicHashTable::getBucketIndex(int key) const {
-    int base = initialBuckets * (1 << level);
-    int index = key % base;
+int LarsonDynamicHashTable::getBucketIndex(uint32_t key) const {
+    int base  = initialBuckets * (1 << level);
+    int index = static_cast<int>(key % static_cast<uint32_t>(base));
 
     if (index < nextSplit) {
-        index = key % (2 * base);
+        index = static_cast<int>(key % static_cast<uint32_t>(2 * base));
     }
 
     return index;
 }
 
-bool LarsonDynamicHashTable::contains(int key) const {
+bool LarsonDynamicHashTable::contains(uint32_t key) const {
     int index = getBucketIndex(key);
 
-    for (int value : buckets[index]) {
-        if (value == key) {
-            return true;
-        }
+    for (uint32_t value : buckets[index]) {
+        if (value == key) return true;
     }
+
     return false;
 }
 
-bool LarsonDynamicHashTable::insert(int key) {
-    if (contains(key)) {
-        return false;
-    }
+bool LarsonDynamicHashTable::insert(uint32_t key) {
+    if (contains(key)) return false;
 
     int index = getBucketIndex(key);
     buckets[index].push_back(key);
     keyCount++;
 
-    if (getLoadFactor() > maxLoadFactor) {
-        split();
-    }
+    if (getLoadFactor() > maxLoadFactor) split();
 
     return true;
 }
 
-bool LarsonDynamicHashTable::remove(int key) {
+bool LarsonDynamicHashTable::remove(uint32_t key) {
     int index = getBucketIndex(key);
 
     for (auto it = buckets[index].begin(); it != buckets[index].end(); ++it) {
@@ -74,23 +67,22 @@ bool LarsonDynamicHashTable::remove(int key) {
 }
 
 void LarsonDynamicHashTable::split() {
-    int base = initialBuckets * (1 << level);
-    int splitIndex = nextSplit;
+    int base           = initialBuckets * (1 << level);
+    int splitIndex     = nextSplit;
     int newBucketIndex = splitIndex + base;
 
-    buckets.push_back(std::vector<int>());
+    buckets.push_back(std::vector<uint32_t>());
 
-    std::vector<int> oldKeys = buckets[splitIndex];
+    std::vector<uint32_t> oldKeys = buckets[splitIndex];
     buckets[splitIndex].clear();
 
-    for (int key : oldKeys) {
-        int newIndex = key % (2 * base);
+    for (uint32_t key : oldKeys) {
+        int newIndex = static_cast<int>(key % static_cast<uint32_t>(2 * base));
 
-        if (newIndex == splitIndex) {
+        if (newIndex == splitIndex)
             buckets[splitIndex].push_back(key);
-        } else {
+        else
             buckets[newBucketIndex].push_back(key);
-        }
     }
 
     nextSplit++;
@@ -103,29 +95,23 @@ void LarsonDynamicHashTable::split() {
 }
 
 void LarsonDynamicHashTable::merge() {
-    if (buckets.size() <= static_cast<size_t>(initialBuckets)) {
-        return;
-    }
+    if (buckets.size() <= static_cast<size_t>(initialBuckets)) return;
 
     int base = initialBuckets * (1 << level);
 
     if (nextSplit == 0) {
-        if (level == 0) {
-            return;
-        }
+        if (level == 0) return;
         level--;
-        base = initialBuckets * (1 << level);
+        base      = initialBuckets * (1 << level);
         nextSplit = base;
     }
 
     nextSplit--;
     int buddyIndex = nextSplit + base;
 
-    if (buddyIndex >= static_cast<int>(buckets.size())) {
-        return;
-    }
+    if (buddyIndex >= static_cast<int>(buckets.size())) return;
 
-    for (int key : buckets[buddyIndex]) {
+    for (uint32_t key : buckets[buddyIndex]) {
         buckets[nextSplit].push_back(key);
     }
 
@@ -145,29 +131,24 @@ int LarsonDynamicHashTable::getSplitCount() const {
 }
 
 double LarsonDynamicHashTable::getLoadFactor() const {
-    if (buckets.empty() || bucketCapacity == 0) {
-        return 0.0;
-    }
-
+    if (buckets.empty() || bucketCapacity == 0) return 0.0;
     return static_cast<double>(keyCount) / (buckets.size() * bucketCapacity);
+}
+
+size_t LarsonDynamicHashTable::getMemoryBytes() const {
+    size_t bucketOverhead = buckets.size() * sizeof(std::vector<uint32_t>);
+    size_t keyStorage     = static_cast<size_t>(keyCount) * sizeof(uint32_t);
+    return bucketOverhead + keyStorage;
 }
 
 void LarsonDynamicHashTable::print() const {
     std::cout << "\n--- Larson Dynamic Hash Table ---\n";
-    std::cout << "Level: " << level << "\n";
-    std::cout << "Next Split: " << nextSplit << "\n";
-    std::cout << "Total Keys: " << keyCount << "\n";
-    std::cout << "Bucket Count: " << getBucketCount() << "\n";
-    std::cout << "Split Count: " << splitCount << "\n";
-    std::cout << "Load Factor: " << getLoadFactor() << "\n";
-
-    for (size_t i = 0; i < buckets.size(); i++) {
-        std::cout << "Bucket " << i << ": ";
-        for (int key : buckets[i]) {
-            std::cout << key << " ";
-        }
-        std::cout << "\n";
-    }
-
+    std::cout << "Level       : " << level           << "\n";
+    std::cout << "Next Split  : " << nextSplit        << "\n";
+    std::cout << "Total Keys  : " << keyCount         << "\n";
+    std::cout << "Buckets     : " << getBucketCount() << "\n";
+    std::cout << "Splits      : " << splitCount       << "\n";
+    std::cout << "Load Factor : " << getLoadFactor()  << "\n";
+    std::cout << "Memory      : " << getMemoryBytes() / 1024.0 / 1024.0 << " MB\n";
     std::cout << "---------------------------------\n";
 }

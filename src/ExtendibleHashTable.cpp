@@ -11,48 +11,43 @@ ExtendibleHashTable::ExtendibleHashTable(int capacity)
     directory[1] = std::make_shared<Bucket>(1);
 }
 
-int ExtendibleHashTable::hashKey(int key) const {
-    int mask = (1 << globalDepth) - 1;
-    return key & mask;
+int ExtendibleHashTable::hashKey(uint32_t key) const {
+    uint32_t mask = (1u << globalDepth) - 1u;
+    return static_cast<int>(key & mask);
 }
 
-bool ExtendibleHashTable::contains(int key) const {
+bool ExtendibleHashTable::contains(uint32_t key) const {
     int index = hashKey(key);
     const auto& bucket = directory[index];
 
-    for (int value : bucket->keys) {
-        if (value == key) {
-            return true;
-        }
+    for (uint32_t value : bucket->keys) {
+        if (value == key) return true;
     }
+
     return false;
 }
 
-bool ExtendibleHashTable::insert(int key) {
-    if (contains(key)) {
-        return false;
-    }
+bool ExtendibleHashTable::insert(uint32_t key) {
+    if (contains(key)) return false;
 
     while (true) {
-        int index = hashKey(key);
+        int index  = hashKey(key);
         auto bucket = directory[index];
 
-        if ((int)bucket->keys.size() < bucketCapacity) {
+        if (static_cast<int>(bucket->keys.size()) < bucketCapacity) {
             bucket->keys.push_back(key);
             keyCount++;
             return true;
         }
 
-        if (bucket->localDepth == globalDepth) {
-            doubleDirectory();
-        }
+        if (bucket->localDepth == globalDepth) doubleDirectory();
 
         splitBucket(index);
     }
 }
 
-bool ExtendibleHashTable::remove(int key) {
-    int index = hashKey(key);
+bool ExtendibleHashTable::remove(uint32_t key) {
+    int index  = hashKey(key);
     auto bucket = directory[index];
 
     for (auto it = bucket->keys.begin(); it != bucket->keys.end(); ++it) {
@@ -62,11 +57,12 @@ bool ExtendibleHashTable::remove(int key) {
             return true;
         }
     }
+
     return false;
 }
 
 void ExtendibleHashTable::doubleDirectory() {
-    int oldSize = directory.size();
+    int oldSize = static_cast<int>(directory.size());
     directory.resize(oldSize * 2);
 
     for (int i = 0; i < oldSize; i++) {
@@ -77,27 +73,31 @@ void ExtendibleHashTable::doubleDirectory() {
 }
 
 void ExtendibleHashTable::splitBucket(int dirIndex) {
-    auto oldBucket = directory[dirIndex];
+    auto oldBucket    = directory[dirIndex];
     int oldLocalDepth = oldBucket->localDepth;
     int newLocalDepth = oldLocalDepth + 1;
 
-    auto newBucket = std::make_shared<Bucket>(newLocalDepth);
+    auto newBucket        = std::make_shared<Bucket>(newLocalDepth);
     oldBucket->localDepth = newLocalDepth;
 
-    int patternBit = 1 << oldLocalDepth;
+    // Only update directory entries that share the same lower oldLocalDepth bits
+    // as dirIndex AND have bit oldLocalDepth set — avoids O(directory) scan.
+    int lowBits      = dirIndex & ((1 << oldLocalDepth) - 1);
+    int patternBit   = 1 << oldLocalDepth;
+    int stride       = patternBit << 1;          // skip every other matching entry
 
-    for (size_t i = 0; i < directory.size(); i++) {
-        if (directory[i] == oldBucket && (static_cast<int>(i) & patternBit)) {
-            directory[i] = newBucket;
-        }
+    for (int i = lowBits | patternBit;
+         static_cast<size_t>(i) < directory.size();
+         i += stride) {
+        directory[i] = newBucket;
     }
 
-    std::vector<int> oldKeys = oldBucket->keys;
+    std::vector<uint32_t> oldKeys = oldBucket->keys;
     oldBucket->keys.clear();
 
-    for (int key : oldKeys) {
-        int index = hashKey(key);
-        directory[index]->keys.push_back(key);
+    for (uint32_t key : oldKeys) {
+        int idx = hashKey(key);
+        directory[idx]->keys.push_back(key);
     }
 
     splitCount++;
@@ -112,62 +112,32 @@ int ExtendibleHashTable::getSplitCount() const {
 }
 
 int ExtendibleHashTable::getBucketCount() const {
-    std::unordered_set<const Bucket*> uniqueBuckets;
-    for (const auto& ptr : directory) {
-        uniqueBuckets.insert(ptr.get());
-    }
-    return static_cast<int>(uniqueBuckets.size());
+    std::unordered_set<const Bucket*> unique;
+    for (const auto& ptr : directory) unique.insert(ptr.get());
+    return static_cast<int>(unique.size());
 }
 
 double ExtendibleHashTable::getLoadFactor() const {
     int bucketCount = getBucketCount();
-    if (bucketCount == 0 || bucketCapacity == 0) {
-        return 0.0;
-    }
-
+    if (bucketCount == 0 || bucketCapacity == 0) return 0.0;
     return static_cast<double>(keyCount) / (bucketCount * bucketCapacity);
+}
+
+size_t ExtendibleHashTable::getMemoryBytes() const {
+    // directory pointer array + per-bucket struct + actual key storage
+    size_t dirSize   = directory.size() * sizeof(std::shared_ptr<Bucket>);
+    size_t bucketMeta = static_cast<size_t>(getBucketCount()) * sizeof(Bucket);
+    size_t keyStorage = static_cast<size_t>(keyCount) * sizeof(uint32_t);
+    return dirSize + bucketMeta + keyStorage;
 }
 
 void ExtendibleHashTable::print() const {
     std::cout << "\n--- Extendible Hash Table ---\n";
-    std::cout << "Global Depth: " << globalDepth << "\n";
-    std::cout << "Total Keys: " << keyCount << "\n";
-    std::cout << "Bucket Count: " << getBucketCount() << "\n";
-    std::cout << "Split Count: " << splitCount << "\n";
-    std::cout << "Load Factor: " << getLoadFactor() << "\n";
-
-    std::cout << "\nDirectory:\n";
-    for (size_t i = 0; i < directory.size(); i++) {
-        std::cout << "Dir[" << i << "] -> Bucket@" << directory[i].get()
-                  << " (ld=" << directory[i]->localDepth << ")\n";
-    }
-
-    std::cout << "\nUnique Buckets:\n";
-    std::vector<const Bucket*> printed;
-
-    for (const auto& bucketPtr : directory) {
-        const Bucket* rawPtr = bucketPtr.get();
-
-        bool alreadyPrinted = false;
-        for (const Bucket* ptr : printed) {
-            if (ptr == rawPtr) {
-                alreadyPrinted = true;
-                break;
-            }
-        }
-
-        if (!alreadyPrinted) {
-            printed.push_back(rawPtr);
-
-            std::cout << "Bucket@" << rawPtr
-                      << " (localDepth=" << bucketPtr->localDepth << "): ";
-
-            for (int key : bucketPtr->keys) {
-                std::cout << key << " ";
-            }
-            std::cout << "\n";
-        }
-    }
-
+    std::cout << "Global Depth : " << globalDepth     << "\n";
+    std::cout << "Total Keys   : " << keyCount         << "\n";
+    std::cout << "Buckets      : " << getBucketCount() << "\n";
+    std::cout << "Splits       : " << splitCount       << "\n";
+    std::cout << "Load Factor  : " << getLoadFactor()  << "\n";
+    std::cout << "Memory       : " << getMemoryBytes() / 1024.0 / 1024.0 << " MB\n";
     std::cout << "-----------------------------\n";
 }

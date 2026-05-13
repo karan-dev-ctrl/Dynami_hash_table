@@ -11,47 +11,41 @@ LinearHashTable::LinearHashTable(int initBuckets, int capacity, double maxLoad)
     buckets.resize(initialBuckets);
 }
 
-int LinearHashTable::getBucketIndex(int key) const {
-    int mod = initialBuckets * (1 << level);
-    int index = key % mod;
+int LinearHashTable::getBucketIndex(uint32_t key) const {
+    int mod   = initialBuckets * (1 << level);
+    int index = static_cast<int>(key % static_cast<uint32_t>(mod));
 
     if (index < nextSplit) {
-        mod = initialBuckets * (1 << (level + 1));
-        index = key % mod;
+        mod   = initialBuckets * (1 << (level + 1));
+        index = static_cast<int>(key % static_cast<uint32_t>(mod));
     }
 
     return index;
 }
 
-bool LinearHashTable::contains(int key) const {
+bool LinearHashTable::contains(uint32_t key) const {
     int index = getBucketIndex(key);
 
-    for (int value : buckets[index]) {
-        if (value == key) {
-            return true;
-        }
+    for (uint32_t value : buckets[index]) {
+        if (value == key) return true;
     }
 
     return false;
 }
 
-bool LinearHashTable::insert(int key) {
-    if (contains(key)) {
-        return false;
-    }
+bool LinearHashTable::insert(uint32_t key) {
+    if (contains(key)) return false;
 
     int index = getBucketIndex(key);
     buckets[index].push_back(key);
     keyCount++;
 
-    if (getLoadFactor() > maxLoadFactor) {
-        split();
-    }
+    if (getLoadFactor() > maxLoadFactor) split();
 
     return true;
 }
 
-bool LinearHashTable::remove(int key) {
+bool LinearHashTable::remove(uint32_t key) {
     int index = getBucketIndex(key);
 
     for (auto it = buckets[index].begin(); it != buckets[index].end(); ++it) {
@@ -66,23 +60,22 @@ bool LinearHashTable::remove(int key) {
 }
 
 void LinearHashTable::split() {
-    int splitIndex = nextSplit;
-    int oldBase = initialBuckets * (1 << level);
+    int splitIndex    = nextSplit;
+    int oldBase       = initialBuckets * (1 << level);
     int newBucketIndex = splitIndex + oldBase;
 
-    buckets.push_back(std::vector<int>());
+    buckets.push_back(std::vector<uint32_t>());
 
-    std::vector<int> oldKeys = buckets[splitIndex];
+    std::vector<uint32_t> oldKeys = buckets[splitIndex];
     buckets[splitIndex].clear();
 
-    for (int key : oldKeys) {
-        int newIndex = key % (2 * oldBase);
+    for (uint32_t key : oldKeys) {
+        int newIndex = static_cast<int>(key % static_cast<uint32_t>(2 * oldBase));
 
-        if (newIndex == splitIndex) {
+        if (newIndex == splitIndex)
             buckets[splitIndex].push_back(key);
-        } else {
+        else
             buckets[newBucketIndex].push_back(key);
-        }
     }
 
     nextSplit++;
@@ -107,29 +100,25 @@ int LinearHashTable::getSplitCount() const {
 }
 
 double LinearHashTable::getLoadFactor() const {
-    if (buckets.empty() || bucketCapacity == 0) {
-        return 0.0;
-    }
-
+    if (buckets.empty() || bucketCapacity == 0) return 0.0;
     return static_cast<double>(keyCount) / (buckets.size() * bucketCapacity);
+}
+
+size_t LinearHashTable::getMemoryBytes() const {
+    // outer vector entries + actual key storage
+    size_t bucketOverhead = buckets.size() * sizeof(std::vector<uint32_t>);
+    size_t keyStorage     = static_cast<size_t>(keyCount) * sizeof(uint32_t);
+    return bucketOverhead + keyStorage;
 }
 
 void LinearHashTable::print() const {
     std::cout << "\n--- Linear Hash Table ---\n";
-    std::cout << "Level: " << level << "\n";
-    std::cout << "Next Split: " << nextSplit << "\n";
-    std::cout << "Total Keys: " << keyCount << "\n";
-    std::cout << "Bucket Count: " << getBucketCount() << "\n";
-    std::cout << "Split Count: " << splitCount << "\n";
-    std::cout << "Load Factor: " << getLoadFactor() << "\n";
-
-    for (size_t i = 0; i < buckets.size(); i++) {
-        std::cout << "Bucket " << i << ": ";
-        for (int key : buckets[i]) {
-            std::cout << key << " ";
-        }
-        std::cout << "\n";
-    }
-
+    std::cout << "Level       : " << level          << "\n";
+    std::cout << "Next Split  : " << nextSplit       << "\n";
+    std::cout << "Total Keys  : " << keyCount        << "\n";
+    std::cout << "Buckets     : " << getBucketCount() << "\n";
+    std::cout << "Splits      : " << splitCount      << "\n";
+    std::cout << "Load Factor : " << getLoadFactor() << "\n";
+    std::cout << "Memory      : " << getMemoryBytes() / 1024.0 / 1024.0 << " MB\n";
     std::cout << "-------------------------\n";
 }

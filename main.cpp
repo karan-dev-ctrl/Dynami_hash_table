@@ -1,754 +1,238 @@
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-// #include "LinearHashTable.h"
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     LinearHashTable table(2, 2, 0.75);
-
-//     bool benchmarkMode = true;
-
-//     if (!benchmarkMode) {
-//         const int n = 20;
-//         std::vector<int> keys;
-
-//         std::cout << "Random keys:\n";
-//         for (int i = 0; i < n; i++) {
-//             int key = std::rand() % 100;
-//             keys.push_back(key);
-//             std::cout << key << " ";
-//         }
-//         std::cout << "\n\n";
-
-//         for (int key : keys) {
-//             std::cout << "Inserting " << key;
-//             bool inserted = table.insert(key);
-
-//             if (!inserted) {
-//                 std::cout << " (duplicate ignored)";
-//             }
-//             std::cout << "\n";
-//         }
-
-//         table.print();
-//     } else {
-//         const int n = 1000;
-//         std::vector<int> keys;
-//         keys.reserve(n);
-
-//         for (int i = 0; i < n; i++) {
-//             keys.push_back(std::rand() % 5000);
-//         }
-
-//         auto startInsert = std::chrono::high_resolution_clock::now();
-
-//         for (int key : keys) {
-//             table.insert(key);
-//         }
-
-//         auto endInsert = std::chrono::high_resolution_clock::now();
-//         auto insertTime = std::chrono::duration_cast<std::chrono::milliseconds>(endInsert - startInsert);
-
-//         auto startSearch = std::chrono::high_resolution_clock::now();
-
-//         int foundCount = 0;
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-
-//         auto endSearch = std::chrono::high_resolution_clock::now();
-//         auto searchTime = std::chrono::duration_cast<std::chrono::milliseconds>(endSearch - startSearch);
-
-//         std::cout << "\n--- Benchmark Results ---\n";
-//         std::cout << "Inserted keys attempted: " << n << "\n";
-//         std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//         std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//         std::cout << "Splits: " << table.getSplitCount() << "\n";
-//         std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//         std::cout << "Successful searches: " << foundCount << "\n";
-//         std::cout << "Insertion time: " << insertTime.count() << " ms\n";
-//         std::cout << "Search time: " << searchTime.count() << " ms\n";
-//     }
-
-//     return 0;
-// }
-
-
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-// #include "ExtendibleHashTable.h"
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     ExtendibleHashTable table(2);
-
-//     bool benchmarkMode = false;
-
-//     if (!benchmarkMode) {
-//         const int n = 20;
-//         std::vector<int> keys;
-
-//         std::cout << "Random keys:\n";
-//         for (int i = 0; i < n; i++) {
-//             int key = std::rand() % 100;
-//             keys.push_back(key);
-//             std::cout << key << " ";
-//         }
-//         std::cout << "\n\n";
-
-//         for (int key : keys) {
-//             std::cout << "Inserting " << key;
-//             bool inserted = table.insert(key);
-
-//             if (!inserted) {
-//                 std::cout << " (duplicate ignored)";
-//             }
-//             std::cout << "\n";
-//         }
-
-//         table.print();
-
-//         if (!keys.empty()) {
-//             int x = keys[0];
-//             std::cout << "\nContains " << x << ": " << (table.contains(x) ? "Yes" : "No") << "\n";
-//             std::cout << "Removing " << x << ": " << (table.remove(x) ? "Removed" : "Not Found") << "\n";
-//             std::cout << "Contains " << x << ": " << (table.contains(x) ? "Yes" : "No") << "\n";
-//         }
-//     } else {
-//         const int n = 1000;
-//         std::vector<int> keys;
-//         keys.reserve(n);
-
-//         for (int i = 0; i < n; i++) {
-//             keys.push_back(std::rand() % 5000);
-//         }
-
-//         auto startInsert = std::chrono::high_resolution_clock::now();
-//         for (int key : keys) {
-//             table.insert(key);
-//         }
-//         auto endInsert = std::chrono::high_resolution_clock::now();
-
-//         auto startSearch = std::chrono::high_resolution_clock::now();
-//         int foundCount = 0;
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//         auto endSearch = std::chrono::high_resolution_clock::now();
-
-//         auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//         auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//         std::cout << "\n--- Extendible Hashing Benchmark ---\n";
-//         std::cout << "Inserted keys attempted: " << n << "\n";
-//         std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//         std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//         std::cout << "Splits: " << table.getSplitCount() << "\n";
-//         std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//         std::cout << "Successful searches: " << foundCount << "\n";
-//         std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//         std::cout << "Search time: " << searchTime.count() << " us\n";
-//     }
-
-//     return 0;
-// }
-
-
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-
-// #include "LinearHashTable.h"
-// #include "ExtendibleHashTable.h"
-
-// void runLinearHashingTest(const std::vector<int>& keys) {
-//     LinearHashTable table(2, 2, 0.75);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//     auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//     std::cout << "\n=== Linear Hashing Results ===\n";
-//     std::cout << "Inserted keys attempted: " << keys.size() << "\n";
-//     std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//     std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//     std::cout << "Splits: " << table.getSplitCount() << "\n";
-//     std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//     std::cout << "Successful searches: " << foundCount << "\n";
-//     std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//     std::cout << "Search time: " << searchTime.count() << " us\n";
-// }
-
-// void runExtendibleHashingTest(const std::vector<int>& keys) {
-//     ExtendibleHashTable table(2);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//     auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//     std::cout << "\n=== Extendible Hashing Results ===\n";
-//     std::cout << "Inserted keys attempted: " << keys.size() << "\n";
-//     std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//     std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//     std::cout << "Splits: " << table.getSplitCount() << "\n";
-//     std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//     std::cout << "Successful searches: " << foundCount << "\n";
-//     std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//     std::cout << "Search time: " << searchTime.count() << " us\n";
-// }
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     const int n = 1000;
-//     std::vector<int> keys;
-//     keys.reserve(n);
-
-//     for (int i = 0; i < n; i++) {
-//         keys.push_back(std::rand() % 5000);
-//     }
-
-//     std::cout << "=====================================\n";
-//     std::cout << " Hashing Comparison on Same Dataset\n";
-//     std::cout << "=====================================\n";
-//     std::cout << "Dataset size: " << n << "\n";
-
-//     runLinearHashingTest(keys);
-//     runExtendibleHashingTest(keys);
-
-//     return 0;
-// }
-
-
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-// #include "LarsonDynamicHashTable.h"
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     LarsonDynamicHashTable table(2, 2, 0.75, 0.25);
-
-//     bool benchmarkMode = false;
-
-//     if (!benchmarkMode) {
-//         const int n = 20;
-//         std::vector<int> keys;
-
-//         std::cout << "Random keys:\n";
-//         for (int i = 0; i < n; i++) {
-//             int key = std::rand() % 100;
-//             keys.push_back(key);
-//             std::cout << key << " ";
-//         }
-//         std::cout << "\n\n";
-
-//         for (int key : keys) {
-//             std::cout << "Inserting " << key;
-//             bool inserted = table.insert(key);
-
-//             if (!inserted) {
-//                 std::cout << " (duplicate ignored)";
-//             }
-//             std::cout << "\n";
-//         }
-
-//         table.print();
-
-//         if (!keys.empty()) {
-//             int x = keys[0];
-//             std::cout << "\nContains " << x << ": " << (table.contains(x) ? "Yes" : "No") << "\n";
-//             std::cout << "Removing " << x << ": " << (table.remove(x) ? "Removed" : "Not Found") << "\n";
-//             std::cout << "Contains " << x << ": " << (table.contains(x) ? "Yes" : "No") << "\n";
-//             table.print();
-//         }
-//     } else {
-//         const int n = 1000;
-//         std::vector<int> keys;
-//         keys.reserve(n);
-
-//         for (int i = 0; i < n; i++) {
-//             keys.push_back(std::rand() % 5000);
-//         }
-
-//         auto startInsert = std::chrono::high_resolution_clock::now();
-//         for (int key : keys) {
-//             table.insert(key);
-//         }
-//         auto endInsert = std::chrono::high_resolution_clock::now();
-
-//         auto startSearch = std::chrono::high_resolution_clock::now();
-//         int foundCount = 0;
-//         for (int round = 0; round < 100; round++) {
-//             for (int key : keys) {
-//                 if (table.contains(key)) {
-//                     foundCount++;
-//                 }
-//             }
-//         }
-//         auto endSearch = std::chrono::high_resolution_clock::now();
-
-//         auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//         auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//         std::cout << "\n--- Larson Benchmark Results ---\n";
-//         std::cout << "Inserted keys attempted: " << n << "\n";
-//         std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//         std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//         std::cout << "Splits: " << table.getSplitCount() << "\n";
-//         std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//         std::cout << "Successful searches: " << foundCount << "\n";
-//         std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//         std::cout << "Search time: " << searchTime.count() << " us\n";
-//     }
-
-//     return 0;
-// }
-
-
-
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-
-// #include "LinearHashTable.h"
-// #include "ExtendibleHashTable.h"
-// #include "LarsonDynamicHashTable.h"
-
-// void runLinearHashingTest(const std::vector<int>& keys) {
-//     LinearHashTable table(2, 2, 0.75);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//     auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//     std::cout << "\n=== Linear Hashing Results ===\n";
-//     std::cout << "Inserted keys attempted: " << keys.size() << "\n";
-//     std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//     std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//     std::cout << "Splits: " << table.getSplitCount() << "\n";
-//     std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//     std::cout << "Successful searches: " << foundCount << "\n";
-//     std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//     std::cout << "Search time: " << searchTime.count() << " us\n";
-// }
-
-// void runExtendibleHashingTest(const std::vector<int>& keys) {
-//     ExtendibleHashTable table(2);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//     auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//     std::cout << "\n=== Extendible Hashing Results ===\n";
-//     std::cout << "Inserted keys attempted: " << keys.size() << "\n";
-//     std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//     std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//     std::cout << "Splits: " << table.getSplitCount() << "\n";
-//     std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//     std::cout << "Successful searches: " << foundCount << "\n";
-//     std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//     std::cout << "Search time: " << searchTime.count() << " us\n";
-// }
-
-// void runLarsonHashingTest(const std::vector<int>& keys) {
-//     LarsonDynamicHashTable table(2, 2, 0.75, 0.25);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     auto insertTime = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert);
-//     auto searchTime = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch);
-
-//     std::cout << "\n=== Larson Dynamic Hash Table Results ===\n";
-//     std::cout << "Inserted keys attempted: " << keys.size() << "\n";
-//     std::cout << "Unique keys stored: " << table.getKeyCount() << "\n";
-//     std::cout << "Buckets: " << table.getBucketCount() << "\n";
-//     std::cout << "Splits: " << table.getSplitCount() << "\n";
-//     std::cout << "Load Factor: " << table.getLoadFactor() << "\n";
-//     std::cout << "Successful searches: " << foundCount << "\n";
-//     std::cout << "Insertion time: " << insertTime.count() << " us\n";
-//     std::cout << "Search time: " << searchTime.count() << " us\n";
-// }
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     const int n = 1000;
-//     std::vector<int> keys;
-//     keys.reserve(n);
-
-//     for (int i = 0; i < n; i++) {
-//         keys.push_back(std::rand() % 5000);
-//     }
-
-//     std::cout << "============================================\n";
-//     std::cout << " 3-Way Hashing Comparison on Same Dataset\n";
-//     std::cout << "============================================\n";
-//     std::cout << "Dataset size: " << n << "\n";
-
-//     runLinearHashingTest(keys);
-//     runExtendibleHashingTest(keys);
-//     runLarsonHashingTest(keys);
-
-//     return 0;
-// }
-
-
-// #include <iostream>
-// #include <vector>
-// #include <cstdlib>
-// #include <ctime>
-// #include <chrono>
-
-// #include "LinearHashTable.h"
-// #include "ExtendibleHashTable.h"
-// #include "LarsonDynamicHashTable.h"
-
-// struct BenchmarkResult {
-//     int attemptedKeys;
-//     int uniqueKeys;
-//     int buckets;
-//     int splits;
-//     double loadFactor;
-//     int successfulSearches;
-//     long long insertTimeUs;
-//     long long searchTimeUs;
-// };
-
-// BenchmarkResult runLinearHashingTest(const std::vector<int>& keys) {
-//     LinearHashTable table(2, 2, 0.75);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     BenchmarkResult result;
-//     result.attemptedKeys = static_cast<int>(keys.size());
-//     result.uniqueKeys = table.getKeyCount();
-//     result.buckets = table.getBucketCount();
-//     result.splits = table.getSplitCount();
-//     result.loadFactor = table.getLoadFactor();
-//     result.successfulSearches = foundCount;
-//     result.insertTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert).count();
-//     result.searchTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch).count();
-
-//     return result;
-// }
-
-// BenchmarkResult runExtendibleHashingTest(const std::vector<int>& keys) {
-//     ExtendibleHashTable table(2);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     BenchmarkResult result;
-//     result.attemptedKeys = static_cast<int>(keys.size());
-//     result.uniqueKeys = table.getKeyCount();
-//     result.buckets = table.getBucketCount();
-//     result.splits = table.getSplitCount();
-//     result.loadFactor = table.getLoadFactor();
-//     result.successfulSearches = foundCount;
-//     result.insertTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert).count();
-//     result.searchTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch).count();
-
-//     return result;
-// }
-
-// BenchmarkResult runLarsonHashingTest(const std::vector<int>& keys) {
-//     LarsonDynamicHashTable table(2, 2, 0.75, 0.25);
-
-//     auto startInsert = std::chrono::high_resolution_clock::now();
-//     for (int key : keys) {
-//         table.insert(key);
-//     }
-//     auto endInsert = std::chrono::high_resolution_clock::now();
-
-//     auto startSearch = std::chrono::high_resolution_clock::now();
-//     int foundCount = 0;
-//     for (int round = 0; round < 100; round++) {
-//         for (int key : keys) {
-//             if (table.contains(key)) {
-//                 foundCount++;
-//             }
-//         }
-//     }
-//     auto endSearch = std::chrono::high_resolution_clock::now();
-
-//     BenchmarkResult result;
-//     result.attemptedKeys = static_cast<int>(keys.size());
-//     result.uniqueKeys = table.getKeyCount();
-//     result.buckets = table.getBucketCount();
-//     result.splits = table.getSplitCount();
-//     result.loadFactor = table.getLoadFactor();
-//     result.successfulSearches = foundCount;
-//     result.insertTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert).count();
-//     result.searchTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(endSearch - startSearch).count();
-
-//     return result;
-// }
-
-// void printResult(const std::string& name, const BenchmarkResult& result) {
-//     std::cout << "\n=== " << name << " ===\n";
-//     std::cout << "Inserted keys attempted: " << result.attemptedKeys << "\n";
-//     std::cout << "Unique keys stored: " << result.uniqueKeys << "\n";
-//     std::cout << "Buckets: " << result.buckets << "\n";
-//     std::cout << "Splits: " << result.splits << "\n";
-//     std::cout << "Load Factor: " << result.loadFactor << "\n";
-//     std::cout << "Successful searches: " << result.successfulSearches << "\n";
-//     std::cout << "Insertion time: " << result.insertTimeUs << " us\n";
-//     std::cout << "Search time: " << result.searchTimeUs << " us\n";
-// }
-
-// std::vector<int> generateRandomKeys(int n, int maxValue) {
-//     std::vector<int> keys;
-//     keys.reserve(n);
-
-//     for (int i = 0; i < n; i++) {
-//         keys.push_back(std::rand() % maxValue);
-//     }
-
-//     return keys;
-// }
-
-// int main() {
-//     std::srand(static_cast<unsigned>(std::time(nullptr)));
-
-//     std::vector<int> sizes = {1000, 5000, 10000};
-
-//     std::cout << "============================================\n";
-//     std::cout << " Multi-Size Hashing Comparison\n";
-//     std::cout << "============================================\n";
-
-//     for (int n : sizes) {
-//         std::vector<int> keys = generateRandomKeys(n, n * 5);
-
-//         std::cout << "\n\n############################################\n";
-//         std::cout << "Dataset size: " << n << "\n";
-//         std::cout << "############################################\n";
-
-//         BenchmarkResult linearResult = runLinearHashingTest(keys);
-//         BenchmarkResult extendibleResult = runExtendibleHashingTest(keys);
-//         BenchmarkResult larsonResult = runLarsonHashingTest(keys);
-
-//         printResult("Linear Hashing Results", linearResult);
-//         printResult("Extendible Hashing Results", extendibleResult);
-//         printResult("Larson Dynamic Hash Table Results", larsonResult);
-//     }
-
-//     return 0;
-// }
+/*
+ * Benchmark: 4-round cumulative insertion test
+ *
+ * Each round inserts 1,000,000 uint32_t keys into all three hash tables
+ * (tables are NOT reset between rounds — insertion is cumulative).
+ *
+ * Per round, per table:
+ *   - Insert all keys  → report CPU time + table size
+ *   - Query all keys   → report CPU time + hit count
+ *
+ * Rounds
+ *   1: max key value =  10,000,000
+ *   2: max key value =  20,000,000
+ *   3: max key value =  30,000,000
+ *   4: max key value =  UINT32_MAX (4,294,967,295)
+ */
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
-#include <cstdlib>
+#include <cstdint>
 #include <ctime>
+#include <limits>
+#include <random>
+#include <string>
 
 #include "LinearHashTable.h"
 #include "ExtendibleHashTable.h"
 #include "LarsonDynamicHashTable.h"
 
-int main() {
-    std::srand(static_cast<unsigned>(std::time(nullptr)));
+// ── helpers ──────────────────────────────────────────────────────────────────
 
-    const int n = 20;
-    std::vector<int> keys;
-
-    // Generate random keys
-    std::cout << "============================================\n";
-    std::cout << " Random Keys Demonstration\n";
-    std::cout << "============================================\n";
-
-    std::cout << "\nKeys:\n";
-    for (int i = 0; i < n; i++) {
-        int key = std::rand() % 100;
-        keys.push_back(key);
-        std::cout << key << " ";
-    }
-    std::cout << "\n\n";
-
-    // Create tables
-    LinearHashTable linear(2, 2, 0.75);
-    ExtendibleHashTable extendible(2);
-    LarsonDynamicHashTable larson(2, 2, 0.75, 0.25);
-
-    // Insert keys
-    for (int key : keys) {
-        std::cout << "Inserting " << key << "\n";
-        linear.insert(key);
-        extendible.insert(key);
-        larson.insert(key);
-    }
-
-    // Print results
-    linear.print();
-    extendible.print();
-    larson.print();
-
-    // Simple test (search + delete)
-    if (!keys.empty()) {
-        int testKey = keys[0];
-
-        std::cout << "\n===== Testing Operations =====\n";
-
-        std::cout << "\nTesting key: " << testKey << "\n";
-
-        std::cout << "Linear Contains: "
-                  << (linear.contains(testKey) ? "Yes" : "No") << "\n";
-
-        std::cout << "Extendible Contains: "
-                  << (extendible.contains(testKey) ? "Yes" : "No") << "\n";
-
-        std::cout << "Larson Contains: "
-                  << (larson.contains(testKey) ? "Yes" : "No") << "\n";
-
-        std::cout << "\nRemoving key: " << testKey << "\n";
-
-        linear.remove(testKey);
-        extendible.remove(testKey);
-        larson.remove(testKey);
-
-        std::cout << "\nAfter Removal:\n";
-
-        std::cout << "Linear Contains: "
-                  << (linear.contains(testKey) ? "Yes" : "No") << "\n";
-
-        std::cout << "Extendible Contains: "
-                  << (extendible.contains(testKey) ? "Yes" : "No") << "\n";
-
-        std::cout << "Larson Contains: "
-                  << (larson.contains(testKey) ? "Yes" : "No") << "\n";
-    }
-
-    return 0;
+static std::vector<uint32_t> generateKeys(uint32_t count,
+                                          uint32_t maxVal,
+                                          std::mt19937& rng) {
+    std::uniform_int_distribution<uint32_t> dist(0u, maxVal);
+    std::vector<uint32_t> keys(count);
+    for (auto& k : keys) k = dist(rng);
+    return keys;
 }
 
-// g++ src/ExtendibleHashTable.cpp src/LarsonDynamicHashTable.cpp src/LinearHashTable.cpp src/main.cpp -o app.exe
+static void printSeparator(const std::string& title) {
+    std::cout << "\n";
+    std::cout << "============================================================\n";
+    std::cout << "  " << title << "\n";
+    std::cout << "============================================================\n";
+}
+
+static void printTableHeader() {
+    std::cout << std::left
+              << std::setw(26) << "Metric"
+              << std::setw(18) << "Linear"
+              << std::setw(20) << "Extendible"
+              << std::setw(18) << "Larson"
+              << "\n";
+    std::cout << std::string(82, '-') << "\n";
+}
+
+// ── per-table benchmark run ───────────────────────────────────────────────────
+
+template<typename Table>
+struct RoundResult {
+    long long uniqueKeys;
+    long long bucketCount;
+    long long splitCount;
+    double    loadFactor;
+    double    memoryMB;
+    double    insertMs;   // CPU time in milliseconds
+    double    queryMs;    // CPU time in milliseconds
+    long long hits;
+};
+
+template<typename Table>
+RoundResult<Table> runRound(Table& table,
+                            const std::vector<uint32_t>& keys,
+                            const std::string& name) {
+    RoundResult<Table> res{};
+    const uint32_t total    = static_cast<uint32_t>(keys.size());
+    const uint32_t progress = total / 10;   // print every 10 %
+
+    // ── insert with progress ──────────────────────────────────────────────
+    std::cout << "  " << name << " — inserting..." << std::flush;
+    std::clock_t t0 = std::clock();
+    for (uint32_t i = 0; i < total; i++) {
+        table.insert(keys[i]);
+        if (progress > 0 && (i + 1) % progress == 0)
+            std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
+    }
+    std::clock_t t1 = std::clock();
+    res.insertMs = static_cast<double>(t1 - t0) / CLOCKS_PER_SEC * 1000.0;
+    std::cout << " done.\n" << std::flush;
+
+    // ── snapshot table state ──────────────────────────────────────────────
+    res.uniqueKeys  = table.getKeyCount();
+    res.bucketCount = table.getBucketCount();
+    res.splitCount  = table.getSplitCount();
+    res.loadFactor  = table.getLoadFactor();
+    res.memoryMB    = static_cast<double>(table.getMemoryBytes()) / 1024.0 / 1024.0;
+
+    // ── point query with progress ─────────────────────────────────────────
+    long long hits = 0;
+    std::cout << "  " << name << " — querying  ..." << std::flush;
+    std::clock_t q0 = std::clock();
+    for (uint32_t i = 0; i < total; i++) {
+        hits += table.contains(keys[i]) ? 1 : 0;
+        if (progress > 0 && (i + 1) % progress == 0)
+            std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
+    }
+    std::clock_t q1 = std::clock();
+    res.queryMs = static_cast<double>(q1 - q0) / CLOCKS_PER_SEC * 1000.0;
+    res.hits    = hits;
+    std::cout << " done.\n" << std::flush;
+
+    return res;
+}
+
+// ── print one result row ──────────────────────────────────────────────────────
+
+template<typename T>
+static void printRow(const std::string& label,
+                     T vLinear, T vExtend, T vLarson,
+                     int width = 18) {
+    std::cout << std::left  << std::setw(26) << label
+              << std::left  << std::setw(width) << vLinear
+              << std::left  << std::setw(width + 2) << vExtend
+              << std::left  << std::setw(width) << vLarson
+              << "\n";
+}
+
+// ── main ──────────────────────────────────────────────────────────────────────
+
+int main() {
+    /*
+     * Initial configuration for ~1,000,000 items:
+     *   initBuckets = 262144 (2^18) with capacity=4 → 1,048,576 initial slots
+     *   First split triggers when load exceeds 0.75 (≈ 786K keys inserted)
+     */
+    LinearHashTable        linear    (262144, 4, 0.75);
+    ExtendibleHashTable    extendible(4);
+    LarsonDynamicHashTable larson    (262144, 4, 0.75, 0.25);
+
+    struct Round {
+        uint32_t    count;
+        uint32_t    maxVal;
+        const char* label;
+    };
+
+    const Round rounds[] = {
+        { 1'000'000,  10'000'000u,                          "Round 1 — 1M keys, max value = 10,000,000"    },
+        { 1'000'000,  20'000'000u,                          "Round 2 — 1M keys, max value = 20,000,000"    },
+        { 1'000'000,  30'000'000u,                          "Round 3 — 1M keys, max value = 30,000,000"    },
+        { 1'000'000,  std::numeric_limits<uint32_t>::max(), "Round 4 — 1M keys, max value = UINT32_MAX"    },
+    };
+
+    // Fixed seed → reproducible results across runs
+    std::mt19937 rng(42u);
+
+    std::cout << "\n";
+    std::cout << "************************************************************\n";
+    std::cout << "*   Dynamic Hash Table — 4-Round Benchmark                 *\n";
+    std::cout << "*   Tables are cumulative (not reset between rounds)       *\n";
+    std::cout << "*   CPU time measured via std::clock()                     *\n";
+    std::cout << "************************************************************\n";
+
+    for (const auto& round : rounds) {
+        // Generate this round's key collection
+        std::vector<uint32_t> keys = generateKeys(round.count, round.maxVal, rng);
+
+        printSeparator(round.label);
+
+        // Run all three tables
+        std::cout << "\n";
+        auto rLinear = runRound(linear,     keys, "Linear    ");
+        auto rExtend = runRound(extendible, keys, "Extendible");
+        auto rLarson = runRound(larson,     keys, "Larson    ");
+
+        // ── Insert results ──────────────────────────────────────────────
+        std::cout << "\n  [INSERT — " << round.count / 1'000'000 << "M keys]\n\n";
+        printTableHeader();
+
+        printRow("Unique keys stored",
+                 rLinear.uniqueKeys, rExtend.uniqueKeys, rLarson.uniqueKeys);
+
+        printRow("Bucket count",
+                 rLinear.bucketCount, rExtend.bucketCount, rLarson.bucketCount);
+
+        printRow("Split count",
+                 rLinear.splitCount, rExtend.splitCount, rLarson.splitCount);
+
+        std::cout << std::fixed << std::setprecision(4);
+        printRow("Load factor",
+                 rLinear.loadFactor, rExtend.loadFactor, rLarson.loadFactor);
+
+        std::cout << std::fixed << std::setprecision(2);
+        printRow("Memory (MB)",
+                 rLinear.memoryMB, rExtend.memoryMB, rLarson.memoryMB);
+
+        std::cout << std::fixed << std::setprecision(3);
+        printRow("Insert CPU time (ms)",
+                 rLinear.insertMs, rExtend.insertMs, rLarson.insertMs);
+
+        // ── Query results ───────────────────────────────────────────────
+        std::cout << "\n  [POINT QUERY — " << round.count / 1'000'000 << "M lookups]\n\n";
+        printTableHeader();
+
+        printRow("Query hits",
+                 rLinear.hits, rExtend.hits, rLarson.hits);
+
+        std::cout << std::fixed << std::setprecision(3);
+        printRow("Query CPU time (ms)",
+                 rLinear.queryMs, rExtend.queryMs, rLarson.queryMs);
+    }
+
+    // ── Cumulative totals after all 4 rounds ─────────────────────────────
+    printSeparator("Final state after all 4 rounds (4M keys attempted)");
+    printTableHeader();
+
+    std::cout << std::defaultfloat;
+    printRow("Total keys stored",
+             linear.getKeyCount(),     extendible.getKeyCount(),     larson.getKeyCount());
+    printRow("Total buckets",
+             linear.getBucketCount(),  extendible.getBucketCount(),  larson.getBucketCount());
+    printRow("Total splits",
+             linear.getSplitCount(),   extendible.getSplitCount(),   larson.getSplitCount());
+
+    std::cout << std::fixed << std::setprecision(4);
+    printRow("Load factor",
+             linear.getLoadFactor(),   extendible.getLoadFactor(),   larson.getLoadFactor());
+
+    std::cout << std::fixed << std::setprecision(2);
+    printRow("Memory (MB)",
+             linear.getMemoryBytes()    / 1024.0 / 1024.0,
+             extendible.getMemoryBytes()/ 1024.0 / 1024.0,
+             larson.getMemoryBytes()    / 1024.0 / 1024.0);
+
+    std::cout << "\n";
+    return 0;
+}
