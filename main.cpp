@@ -65,8 +65,10 @@ struct RoundResult {
     long long splitCount;
     double    loadFactor;
     double    memoryMB;
-    double    insertMs;   // CPU time in milliseconds
-    double    queryMs;    // CPU time in milliseconds
+    double    insertMs;           // wall-clock time in milliseconds
+    double    insertThroughput;   // million inserts per second
+    double    queryMs;            // wall-clock time in milliseconds
+    double    queryThroughput;    // million queries per second
     long long hits;
 };
 
@@ -90,7 +92,8 @@ RoundResult<Table> runRound(Table& table,
             std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
     }
     auto t1 = Clock::now();
-    res.insertMs = Ms(t1 - t0).count();
+    res.insertMs         = Ms(t1 - t0).count();
+    res.insertThroughput = static_cast<double>(total) / (res.insertMs / 1000.0) / 1'000'000.0;
     std::cout << " done.\n" << std::flush;
 
     // ── snapshot table state ──────────────────────────────────────────────
@@ -110,8 +113,9 @@ RoundResult<Table> runRound(Table& table,
             std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
     }
     auto q1 = Clock::now();
-    res.queryMs = Ms(q1 - q0).count();
-    res.hits    = hits;
+    res.queryMs         = Ms(q1 - q0).count();
+    res.queryThroughput = static_cast<double>(total) / (res.queryMs / 1000.0) / 1'000'000.0;
+    res.hits            = hits;
     std::cout << " done.\n" << std::flush;
 
     return res;
@@ -202,6 +206,10 @@ int main() {
         printRow("Insert time (ms)",
                  rLinear.insertMs, rExtend.insertMs, rLarson.insertMs);
 
+        std::cout << std::fixed << std::setprecision(3);
+        printRow("Insert throughput(Mop/s)",
+                 rLinear.insertThroughput, rExtend.insertThroughput, rLarson.insertThroughput);
+
         // ── Query results ───────────────────────────────────────────────
         std::cout << "\n  [POINT QUERY — " << round.count / 1'000'000 << "M lookups]\n\n";
         printTableHeader();
@@ -212,6 +220,10 @@ int main() {
         std::cout << std::fixed << std::setprecision(3);
         printRow("Query time (ms)",
                  rLinear.queryMs, rExtend.queryMs, rLarson.queryMs);
+
+        std::cout << std::fixed << std::setprecision(3);
+        printRow("Query throughput(Mop/s)",
+                 rLinear.queryThroughput, rExtend.queryThroughput, rLarson.queryThroughput);
     }
 
     // ── Cumulative totals after all 4 rounds ─────────────────────────────
