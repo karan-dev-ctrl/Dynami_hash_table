@@ -19,7 +19,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstdint>
-#include <ctime>
+#include <chrono>
 #include <limits>
 #include <random>
 #include <string>
@@ -78,16 +78,19 @@ RoundResult<Table> runRound(Table& table,
     const uint32_t total    = static_cast<uint32_t>(keys.size());
     const uint32_t progress = total / 10;   // print every 10 %
 
+    using Clock = std::chrono::high_resolution_clock;
+    using Ms    = std::chrono::duration<double, std::milli>;
+
     // ── insert with progress ──────────────────────────────────────────────
     std::cout << "  " << name << " — inserting..." << std::flush;
-    std::clock_t t0 = std::clock();
+    auto t0 = Clock::now();
     for (uint32_t i = 0; i < total; i++) {
         table.insert(keys[i]);
         if (progress > 0 && (i + 1) % progress == 0)
             std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
     }
-    std::clock_t t1 = std::clock();
-    res.insertMs = static_cast<double>(t1 - t0) / CLOCKS_PER_SEC * 1000.0;
+    auto t1 = Clock::now();
+    res.insertMs = Ms(t1 - t0).count();
     std::cout << " done.\n" << std::flush;
 
     // ── snapshot table state ──────────────────────────────────────────────
@@ -100,14 +103,14 @@ RoundResult<Table> runRound(Table& table,
     // ── point query with progress ─────────────────────────────────────────
     long long hits = 0;
     std::cout << "  " << name << " — querying  ..." << std::flush;
-    std::clock_t q0 = std::clock();
+    auto q0 = Clock::now();
     for (uint32_t i = 0; i < total; i++) {
         hits += table.contains(keys[i]) ? 1 : 0;
         if (progress > 0 && (i + 1) % progress == 0)
             std::cout << " " << ((i + 1) / progress * 10) << "%" << std::flush;
     }
-    std::clock_t q1 = std::clock();
-    res.queryMs = static_cast<double>(q1 - q0) / CLOCKS_PER_SEC * 1000.0;
+    auto q1 = Clock::now();
+    res.queryMs = Ms(q1 - q0).count();
     res.hits    = hits;
     std::cout << " done.\n" << std::flush;
 
@@ -159,7 +162,7 @@ int main() {
     std::cout << "************************************************************\n";
     std::cout << "*   Dynamic Hash Table — 4-Round Benchmark                 *\n";
     std::cout << "*   Tables are cumulative (not reset between rounds)       *\n";
-    std::cout << "*   CPU time measured via std::clock()                     *\n";
+    std::cout << "*   Time measured via std::chrono::high_resolution_clock   *\n";
     std::cout << "************************************************************\n";
 
     for (const auto& round : rounds) {
@@ -196,7 +199,7 @@ int main() {
                  rLinear.memoryMB, rExtend.memoryMB, rLarson.memoryMB);
 
         std::cout << std::fixed << std::setprecision(3);
-        printRow("Insert CPU time (ms)",
+        printRow("Insert time (ms)",
                  rLinear.insertMs, rExtend.insertMs, rLarson.insertMs);
 
         // ── Query results ───────────────────────────────────────────────
@@ -207,7 +210,7 @@ int main() {
                  rLinear.hits, rExtend.hits, rLarson.hits);
 
         std::cout << std::fixed << std::setprecision(3);
-        printRow("Query CPU time (ms)",
+        printRow("Query time (ms)",
                  rLinear.queryMs, rExtend.queryMs, rLarson.queryMs);
     }
 
