@@ -111,6 +111,15 @@ size_t LinearHashTable::getMemoryBytes() const {
     return bucketOverhead + keyStorage;
 }
 
+double LinearHashTable::getPageUtilization() const {
+    if (buckets.empty()) return 0.0;
+    int nonEmpty = 0;
+    for (const auto& bucket : buckets) {
+        if (!bucket.empty()) nonEmpty++;
+    }
+    return static_cast<double>(nonEmpty) / buckets.size() * 100.0;
+}
+
 void LinearHashTable::print() const {
     std::cout << "\n--- Linear Hash Table ---\n";
     std::cout << "Level       : " << level          << "\n";

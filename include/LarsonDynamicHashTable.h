@@ -33,11 +33,12 @@ public:
     bool contains(uint32_t key) const;
     bool remove(uint32_t key);
 
-    int    getKeyCount()    const;
-    int    getBucketCount() const;
-    int    getSplitCount()  const;
-    double getLoadFactor()  const;
-    size_t getMemoryBytes() const;
+    int    getKeyCount()         const;
+    int    getBucketCount()      const;
+    int    getSplitCount()       const;
+    double getLoadFactor()       const;
+    size_t getMemoryBytes()      const;
+    double getPageUtilization()  const;
 
     void print() const;
 };

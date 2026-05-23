@@ -141,6 +141,15 @@ size_t LarsonDynamicHashTable::getMemoryBytes() const {
     return bucketOverhead + keyStorage;
 }
 
+double LarsonDynamicHashTable::getPageUtilization() const {
+    if (buckets.empty()) return 0.0;
+    int nonEmpty = 0;
+    for (const auto& bucket : buckets) {
+        if (!bucket.empty()) nonEmpty++;
+    }
+    return static_cast<double>(nonEmpty) / buckets.size() * 100.0;
+}
+
 void LarsonDynamicHashTable::print() const {
     std::cout << "\n--- Larson Dynamic Hash Table ---\n";
     std::cout << "Level       : " << level           << "\n";

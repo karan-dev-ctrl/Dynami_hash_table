@@ -65,6 +65,7 @@ struct RoundResult {
     long long splitCount;
     double    loadFactor;
     double    memoryMB;
+    double    pageUtilization;    // % of non-empty buckets
     double    insertMs;           // wall-clock time in milliseconds
     double    insertThroughput;   // million inserts per second
     double    queryMs;            // wall-clock time in milliseconds
@@ -97,11 +98,12 @@ RoundResult<Table> runRound(Table& table,
     std::cout << " done.\n" << std::flush;
 
     // ── snapshot table state ──────────────────────────────────────────────
-    res.uniqueKeys  = table.getKeyCount();
-    res.bucketCount = table.getBucketCount();
-    res.splitCount  = table.getSplitCount();
-    res.loadFactor  = table.getLoadFactor();
-    res.memoryMB    = static_cast<double>(table.getMemoryBytes()) / 1024.0 / 1024.0;
+    res.uniqueKeys       = table.getKeyCount();
+    res.bucketCount      = table.getBucketCount();
+    res.splitCount       = table.getSplitCount();
+    res.loadFactor       = table.getLoadFactor();
+    res.memoryMB         = static_cast<double>(table.getMemoryBytes()) / 1024.0 / 1024.0;
+    res.pageUtilization  = table.getPageUtilization();
 
     // ── point query with progress ─────────────────────────────────────────
     long long hits = 0;
@@ -201,6 +203,10 @@ int main() {
         std::cout << std::fixed << std::setprecision(2);
         printRow("Memory (MB)",
                  rLinear.memoryMB, rExtend.memoryMB, rLarson.memoryMB);
+
+        std::cout << std::fixed << std::setprecision(2);
+        printRow("Page utilization(%)",
+                 rLinear.pageUtilization, rExtend.pageUtilization, rLarson.pageUtilization);
 
         std::cout << std::fixed << std::setprecision(3);
         printRow("Insert time (ms)",

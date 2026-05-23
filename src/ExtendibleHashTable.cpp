@@ -125,10 +125,23 @@ double ExtendibleHashTable::getLoadFactor() const {
 
 size_t ExtendibleHashTable::getMemoryBytes() const {
     // directory pointer array + per-bucket struct + actual key storage
-    size_t dirSize   = directory.size() * sizeof(std::shared_ptr<Bucket>);
+    size_t dirSize    = directory.size() * sizeof(std::shared_ptr<Bucket>);
     size_t bucketMeta = static_cast<size_t>(getBucketCount()) * sizeof(Bucket);
     size_t keyStorage = static_cast<size_t>(keyCount) * sizeof(uint32_t);
     return dirSize + bucketMeta + keyStorage;
+}
+
+double ExtendibleHashTable::getPageUtilization() const {
+    // count unique buckets that have at least 1 key
+    std::unordered_set<const Bucket*> unique;
+    for (const auto& ptr : directory) unique.insert(ptr.get());
+
+    int nonEmpty = 0;
+    for (const Bucket* b : unique) {
+        if (!b->keys.empty()) nonEmpty++;
+    }
+    if (unique.empty()) return 0.0;
+    return static_cast<double>(nonEmpty) / unique.size() * 100.0;
 }
 
 void ExtendibleHashTable::print() const {
