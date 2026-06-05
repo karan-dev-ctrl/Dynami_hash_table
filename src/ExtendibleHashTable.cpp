@@ -117,6 +117,10 @@ int ExtendibleHashTable::getBucketCount() const {
     return static_cast<int>(unique.size());
 }
 
+int ExtendibleHashTable::getPageCapacity() const {
+    return bucketCapacity;
+}
+
 double ExtendibleHashTable::getLoadFactor() const {
     int bucketCount = getBucketCount();
     if (bucketCount == 0 || bucketCapacity == 0) return 0.0;

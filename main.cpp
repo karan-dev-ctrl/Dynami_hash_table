@@ -63,6 +63,7 @@ struct RoundResult {
     long long uniqueKeys;
     long long bucketCount;
     long long splitCount;
+    int       pageCapacity;       // max keys per bucket
     double    loadFactor;
     double    memoryMB;
     double    pageUtilization;    // % of non-empty buckets
@@ -101,6 +102,7 @@ RoundResult<Table> runRound(Table& table,
     res.uniqueKeys       = table.getKeyCount();
     res.bucketCount      = table.getBucketCount();
     res.splitCount       = table.getSplitCount();
+    res.pageCapacity     = table.getPageCapacity();
     res.loadFactor       = table.getLoadFactor();
     res.memoryMB         = static_cast<double>(table.getMemoryBytes()) / 1024.0 / 1024.0;
     res.pageUtilization  = table.getPageUtilization();
@@ -190,8 +192,11 @@ int main() {
         printRow("Unique keys stored",
                  rLinear.uniqueKeys, rExtend.uniqueKeys, rLarson.uniqueKeys);
 
-        printRow("Bucket count",
+        printRow("Page count",
                  rLinear.bucketCount, rExtend.bucketCount, rLarson.bucketCount);
+
+        printRow("Page capacity",
+                 rLinear.pageCapacity, rExtend.pageCapacity, rLarson.pageCapacity);
 
         printRow("Split count",
                  rLinear.splitCount, rExtend.splitCount, rLarson.splitCount);

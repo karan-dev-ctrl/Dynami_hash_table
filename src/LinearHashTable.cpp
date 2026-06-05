@@ -95,6 +95,10 @@ int LinearHashTable::getBucketCount() const {
     return static_cast<int>(buckets.size());
 }
 
+int LinearHashTable::getPageCapacity() const {
+    return bucketCapacity;
+}
+
 int LinearHashTable::getSplitCount() const {
     return splitCount;
 }

@@ -126,6 +126,10 @@ int LarsonDynamicHashTable::getBucketCount() const {
     return static_cast<int>(buckets.size());
 }
 
+int LarsonDynamicHashTable::getPageCapacity() const {
+    return bucketCapacity;
+}
+
 int LarsonDynamicHashTable::getSplitCount() const {
     return splitCount;
 }

@@ -36,6 +36,7 @@ public:
     int    getKeyCount()         const;
     int    getBucketCount()      const;
     int    getSplitCount()       const;
+    int    getPageCapacity()     const;
     double getLoadFactor()       const;
     size_t getMemoryBytes()      const;
     double getPageUtilization()  const;
