@@ -195,7 +195,8 @@ each round adds more keys on top of the previous state.
 
 ### Metrics Collected Per Round Per Table
 - Unique keys stored (cumulative)
-- Bucket count
+- Page count (total buckets)
+- Page capacity (max keys per bucket)
 - Split count
 - Load factor
 - Memory usage (MB)
@@ -217,7 +218,8 @@ each round adds more keys on top of the previous state.
 | Metric | Linear | Extendible | Larson |
 |--------|--------|------------|--------|
 | Unique keys stored | 951,464 | 951,464 | 951,464 |
-| Bucket count | 317,155 | 337,998 | 317,155 |
+| Page count | 317,155 | 337,998 | 317,155 |
+| Page capacity | 4 | 4 | 4 |
 | Split count | 55,011 | 337,996 | 55,011 |
 | Load factor | 0.7500 | 0.7037 | 0.7500 |
 | Memory (MB) | 7.26 | 40.79 | 7.26 |
@@ -235,7 +237,8 @@ each round adds more keys on top of the previous state.
 | Metric | Linear | Extendible | Larson |
 |--------|--------|------------|--------|
 | Unique keys stored | 1,880,619 | 1,880,619 | 1,880,619 |
-| Bucket count | 626,873 | 665,988 | 626,873 |
+| Page count | 626,873 | 665,988 | 626,873 |
+| Page capacity | 4 | 4 | 4 |
 | Split count | 364,729 | 665,986 | 364,729 |
 | Load factor | 0.7500 | 0.7060 | 0.7500 |
 | Memory (MB) | 14.35 | 81.34 | 14.35 |
@@ -253,7 +256,8 @@ each round adds more keys on top of the previous state.
 | Metric | Linear | Extendible | Larson |
 |--------|--------|------------|--------|
 | Unique keys stored | 2,802,443 | 2,802,443 | 2,802,443 |
-| Bucket count | 934,148 | 991,488 | 934,148 |
+| Page count | 934,148 | 991,488 | 934,148 |
+| Page capacity | 4 | 4 | 4 |
 | Split count | 672,004 | 991,486 | 672,004 |
 | Load factor | 0.7500 | 0.7066 | 0.7500 |
 | Memory (MB) | 21.38 | 89.82 | 21.38 |
@@ -271,7 +275,8 @@ each round adds more keys on top of the previous state.
 | Metric | Linear | Extendible | Larson |
 |--------|--------|------------|--------|
 | Unique keys stored | 3,801,696 | 3,801,696 | 3,801,696 |
-| Bucket count | 1,267,232 | 1,351,839 | 1,267,232 |
+| Page count | 1,267,232 | 1,351,839 | 1,267,232 |
+| Page capacity | 4 | 4 | 4 |
 | Split count | 1,005,088 | 1,351,837 | 1,005,088 |
 | Load factor | 0.7500 | 0.7031 | 0.7500 |
 | Memory (MB) | 29.00 | 291.13 | 29.00 |
